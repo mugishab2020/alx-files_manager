@@ -1,34 +1,34 @@
-const express = require('express');
 import AppController from '../controllers/AppController';
-import UsersController from '../controllers/UsersController';
+import userController from '../controllers/UsersController';
 import AuthController from '../controllers/AuthController';
-import FilesController from '../controllers/FilesController';
 
+const express = require('express');
+/** *
+ * creating a route for the app
+ *
+ */
+const router = express.Router();
 
-const routes = express.Router();
-
-routes.get('/status', (req, res)=>{
-    AppController.getStatus(req, res);
+router.get('/status', (req, res) => {
+  AppController.getStatus(req, res);
 });
-routes.get('/stats', (req, res)=>{
-    AppController.getStats(req, res);
-});
-
-routes.post('/users', (req, res)=>{
-    UsersController.postNew(req, res);
-});
-routes.get('/connect', (req, res)=>{
-    AuthController.getConnect(req, res);
+router.get('/stats', (req, res) => {
+  AppController.getStats(req, res);
 });
 
-routes.get('/users/me', (req, res)=>{
-    AuthController.getDisconnect(req, res);
+router.post('/users', (req, res) => {
+  userController.postNew(req, res);
 });
 
-routes.get('/connect', (req, res)=>{
-    AuthController.getMe(rq, res);
+router.get('/connect', (req, res) => {
+  AuthController.getConnect(req, res);
 });
-routes.post('/files', (req, res)=>{
-    FilesController.postUpload(req, res);
+
+router.get('/disconnect', (req, res) => {
+  AuthController.getDisconnect(req, res);
 });
-export default routes;
+
+router.get('/users/me', (req, res) => {
+  userController.getMe(req, res);
+});
+export default router;
