@@ -1,51 +1,68 @@
-// utils/db.js
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+const { MongoClient, ObjectId } = require('mongodb');
+/**
+ * this is a mongo
+ * db client class
+ */
 
-dotenv.config();
+const host = process.env.DB_HOST || 'localhost';
+const dbPort = process.env.DB_PORT || 27017;
+const dbDataBase = process.env.DB_DATABASE || 'files_manager';
+const url = `mongodb://${host}:${dbPort}`;
 
 class DBClient {
-    constructor() {
-        const host = process.env.DB_HOST || 'localhost';
-        const port = process.env.DB_PORT || 27017;
-        const database = process.env.DB_DATABASE || 'files_manager';
-        const url = `mongodb://${host}:${port}`;
+  // contructor of the mongodb client
+  constructor() {
+    this.client = new MongoClient(url, { useUnifiedTopology: true });
+    this.client.connect();
+    this.db = this.client.db(dbDataBase);
+  }
 
-        this.client = new MongoClient(url, { useUnifiedTopology: true });
+  /**
+     * isAlive is a function
+     * that returns true if the
+     * client is connected
+     * @param {nothing}
+     */
 
-        this.client.connect()
-            .then(() => {
-                this.db = this.client.db(database);
-                console.log('Connected to MongoDB');
-            })
-            .catch((err) => {
-                console.error('Connection failed', err);
-            });
-    }
+  isAlive() {
+    return this.client.isConnected();
+  }
 
-    isAlive() {
-        return this.client && this.client.isConnected();;
-    }
+  /**
+     * nbUsers is a function that returns the
+     * number of documents in the collection
+     * users
+     */
+  async nbUsers() {
+    return this.db.collection('users').countDocuments();
+  }
 
-    async nbUsers() {
-        try {
-            const usersCollection = this.db.collection('users').countDocuments();
-            return await usersCollection;
-        } catch (err) {
-            console.error('Error counting users:', err);
-            return 0;
-        }
-    }
+  async findUser(user) {
+    return this.db.collection('users').findOne(user);
+  }
 
-    async nbFiles() {
-        try {
-            const filesCollection = this.db.collection('files').countDocuments();
-            return await filesCollection;
-        } catch (err) {
-            console.error('Error counting files:', err);
-            return 0;
-        }
-    }
+  async createUser(user) {
+    return this.db.collection('users').insertOne(user);
+  }
+  /**
+     * nbFiles is a function that
+     * returns the number of document
+     * on the collection files
+     * @param {0}
+     */
+
+  async nbFiles() {
+    return this.db.collection('files').countDocuments();
+  }
+
+  /**
+   * find user by id
+   */
+  async findUserById(userId) {
+    const user = this.db.collection('users').findOne({ _id: ObjectId(userId) });
+    // Handle the user data or errors here
+    return user;
+  }
 }
 
 const dbClient = new DBClient();
